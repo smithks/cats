@@ -20,8 +20,7 @@ class CatBreedFragment : Fragment() {
         val view = inflater.inflate(R.layout.cat_breed_fragment, container, false)
         val catViewModel = ViewModelProviders.of(activity!!).get(CatViewModel::class.java)
 
-        catViewModel.catService = (activity?.application as CatApplication).catService
-
+        catViewModel.catService = (activity?.application as CatApplication).catComponent.catService()
         catViewModel.breedList.observe(this, Observer {breeds ->
             view.findViewById<TextView>(R.id.breeds_text_view).text = breeds.fold("", {acc, breedModel -> "$acc $breedModel"})
         })

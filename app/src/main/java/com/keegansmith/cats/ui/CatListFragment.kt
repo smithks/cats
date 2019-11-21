@@ -31,10 +31,8 @@ class CatListFragment: Fragment() {
         val errorMessage: TextView = view.findViewById(R.id.error_message_text_view)
 
         // Establish viewmodel and catService
-        //TODO inject service
-        val catService = (activity?.application as CatApplication).catService
         val catViewModel = ViewModelProviders.of(activity!!).get(CatViewModel::class.java)
-        catViewModel.catService = catService
+        catViewModel.catService = (activity?.application as CatApplication).catComponent.catService()
 
         catViewModel.errorMessage.observe(this, Observer {
             recyclerView.visibility = View.GONE
