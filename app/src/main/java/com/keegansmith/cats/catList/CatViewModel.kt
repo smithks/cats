@@ -5,13 +5,20 @@ import androidx.lifecycle.ViewModel
 import com.keegansmith.cats.api.CatService
 import com.keegansmith.cats.api.model.BreedModel
 import com.keegansmith.cats.api.model.CatModel
+import com.keegansmith.cats.di.CatComponent
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import javax.inject.Inject
 
 class CatViewModel: ViewModel() {
 
-    var catService: CatService? = null
+    @Inject
+    lateinit var catService: CatService
+
+    fun init(component: CatComponent) {
+        component.inject(this)
+    }
 
     val catList: MutableLiveData<List<CatModel>> = MutableLiveData()
     val errorMessage: MutableLiveData<Unit> = MutableLiveData()
@@ -19,7 +26,7 @@ class CatViewModel: ViewModel() {
 
     fun fetchCats() {
         catList.value = emptyList()
-        catService?.fetchRandomCats()?.enqueue(object: Callback<List<CatModel>> {
+        catService.fetchRandomCats()?.enqueue(object: Callback<List<CatModel>> {
             override fun onFailure(call: Call<List<CatModel>>, t: Throwable) {
                 errorMessage.postValue(Unit)
             }
@@ -38,7 +45,7 @@ class CatViewModel: ViewModel() {
 
     fun fetchBreeds() {
         breedList.value = emptyList()
-        catService?.fetchBreeds()?.enqueue(object : Callback<List<BreedModel>> {
+        catService.fetchBreeds().enqueue(object : Callback<List<BreedModel>> {
             override fun onFailure(call: Call<List<BreedModel>>, t: Throwable) {
                 errorMessage.postValue(Unit)
             }

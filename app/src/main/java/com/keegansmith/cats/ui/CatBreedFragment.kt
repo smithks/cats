@@ -5,6 +5,9 @@ import android.service.autofill.TextValueSanitizer
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.ProgressBar
+import android.widget.ScrollView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -16,20 +19,37 @@ import com.keegansmith.cats.catList.CatViewModel
 
 class CatBreedFragment : Fragment() {
 
+    lateinit var breedsTextView: TextView
+    lateinit var breedsProgressBar: ProgressBar
+    lateinit var breedsErrorMessage: TextView
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.cat_breed_fragment, container, false)
         val catViewModel = ViewModelProviders.of(activity!!).get(CatViewModel::class.java)
 
-        catViewModel.catService = (activity?.application as CatApplication).catComponent.catService()
+        breedsTextView = view.findViewById(R.id.breeds_text_view)
+        breedsProgressBar = view.findViewById(R.id.breeds_loading_progress)
+        breedsErrorMessage = view.findViewById(R.id.error_message_text_view)
+
+        catViewModel.init((activity?.application as CatApplication).catComponent)
         catViewModel.breedList.observe(this, Observer {breeds ->
-            view.findViewById<TextView>(R.id.breeds_text_view).text = breeds.fold("", {acc, breedModel -> "$acc $breedModel"})
+            breedsTextView.text = breeds.fold("", {acc, breedModel -> "$acc $breedModel"})
+            if (breeds.isNotEmpty()) {
+                breedsProgressBar.visibility = View.GONE
+            }
         })
 
         catViewModel.errorMessage.observe(this, Observer {
-            view.findViewById<TextView>(R.id.error_message_text_view).visibility = View.VISIBLE
+            breedsErrorMessage.visibility = View.VISIBLE
         })
 
+        breedsProgressBar.visibility = View.VISIBLE
         catViewModel.fetchBreeds()
+
+        view.findViewById<Button>(R.id.fetch_breeds_button).setOnClickListener {
+            catViewModel.fetchBreeds()
+            breedsProgressBar.visibility = View.VISIBLE
+        }
 
         return view
     }

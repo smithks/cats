@@ -3,4 +3,6 @@
     <string name="error_message">Couldn\'t find any cats. Sorry</string>
     <string name="view_cats_string">View Cats</string>
     <string name="view_breeds_string">View Breeds</string>
+    <string name="update_breeds_string">Fetch Breeds</string>
+
 </resources>

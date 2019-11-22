@@ -32,7 +32,7 @@ class CatListFragment: Fragment() {
 
         // Establish viewmodel and catService
         val catViewModel = ViewModelProviders.of(activity!!).get(CatViewModel::class.java)
-        catViewModel.catService = (activity?.application as CatApplication).catComponent.catService()
+        catViewModel.init((activity?.application as CatApplication).catComponent)
 
         catViewModel.errorMessage.observe(this, Observer {
             recyclerView.visibility = View.GONE
