@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <Button
+        android:id="@+id/fetch_breeds_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/delete_breeds_button"
+        app:layout_constraintVertical_chainStyle="packed"
+        android:layout_marginBottom="20dp"
+        android:text="@string/update_breeds_string"/>
+
+    <Button
+        android:id="@+id/delete_breeds_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/fetch_breeds_button"
+        app:layout_constraintBottom_toTopOf="@id/file_size_text_view"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginBottom="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:text="@string/delete_breeds_string"/>
+
+    <TextView
+        android:id="@+id/file_size_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/delete_breeds_button"
+        app:layout_constraintBottom_toTopOf="@id/guideline"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.5" />
+
+    <ScrollView
+        android:id="@+id/breeds_scroll_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="40dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/guideline">
+
+        <TextView
+            android:id="@+id/breeds_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="Cat breed info goes here" />
+
+    </ScrollView>
+
+    <ProgressBar
+        android:id="@+id/breeds_loading_progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="@id/breeds_scroll_view"
+        app:layout_constraintStart_toStartOf="@id/breeds_scroll_view"
+        app:layout_constraintEnd_toEndOf="@id/breeds_scroll_view"
+        app:layout_constraintBottom_toBottomOf="@id/breeds_scroll_view"/>
+
+    <TextView
+        android:id="@+id/error_message_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/breeds_scroll_view"
+        app:layout_constraintEnd_toEndOf="@id/breeds_scroll_view"
+        app:layout_constraintStart_toStartOf="@id/breeds_scroll_view"
+        app:layout_constraintTop_toTopOf="@id/breeds_scroll_view" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
