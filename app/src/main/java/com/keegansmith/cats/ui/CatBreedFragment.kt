@@ -22,6 +22,7 @@ class CatBreedFragment : Fragment() {
     lateinit var breedsTextView: TextView
     lateinit var breedsProgressBar: ProgressBar
     lateinit var breedsErrorMessage: TextView
+    lateinit var fileSizeTextView: TextView
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.cat_breed_fragment, container, false)
@@ -30,6 +31,7 @@ class CatBreedFragment : Fragment() {
         breedsTextView = view.findViewById(R.id.breeds_text_view)
         breedsProgressBar = view.findViewById(R.id.breeds_loading_progress)
         breedsErrorMessage = view.findViewById(R.id.error_message_text_view)
+        fileSizeTextView = view.findViewById(R.id.file_size_text_view)
 
         catViewModel.init((activity?.application as CatApplication).catComponent)
         catViewModel.breedList.observe(this, Observer {breeds ->
@@ -50,6 +52,14 @@ class CatBreedFragment : Fragment() {
             catViewModel.fetchBreeds()
             breedsProgressBar.visibility = View.VISIBLE
         }
+
+        view.findViewById<Button>(R.id.delete_breeds_button).setOnClickListener {
+            catViewModel.deleteBreeds()
+        }
+
+        catViewModel.breedFileSize.observe(this, Observer { fileSize ->
+            fileSizeTextView.text = fileSize
+        })
 
         return view
     }

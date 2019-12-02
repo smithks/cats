@@ -21,9 +21,19 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/view_breeds_string"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/view_cat_cache_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/cat_list_button" />
+
+    <Button
+        android:id="@+id/view_cat_cache_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/view_cat_cache_string"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/breed_list_button"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

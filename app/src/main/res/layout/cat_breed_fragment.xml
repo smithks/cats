@@ -12,8 +12,30 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/guideline"
+        app:layout_constraintBottom_toTopOf="@id/delete_breeds_button"
+        app:layout_constraintVertical_chainStyle="packed"
+        android:layout_marginBottom="20dp"
         android:text="@string/update_breeds_string"/>
+
+    <Button
+        android:id="@+id/delete_breeds_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/fetch_breeds_button"
+        app:layout_constraintBottom_toTopOf="@id/file_size_text_view"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginBottom="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:text="@string/delete_breeds_string"/>
+
+    <TextView
+        android:id="@+id/file_size_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/delete_breeds_button"
+        app:layout_constraintBottom_toTopOf="@id/guideline"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline"

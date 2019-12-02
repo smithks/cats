@@ -4,5 +4,10 @@
     <string name="view_cats_string">View Cats</string>
     <string name="view_breeds_string">View Breeds</string>
     <string name="update_breeds_string">Fetch Breeds</string>
+    <string name="delete_breeds_string">Delete Breeds</string>
+    <string name="view_cat_cache_string">View Cat Cache</string>
+    <string name="image_file_size_string">Image file size:</string>
+    <string name="delete_image_string">Delete Image</string>
+    <string name="fetch_image_string">Fetch Image</string>
 
 </resources>
