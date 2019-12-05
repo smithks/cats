@@ -1,13 +1,11 @@
 package com.keegansmith.cats.ui
 
 import android.os.Bundle
-import android.service.autofill.TextValueSanitizer
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ProgressBar
-import android.widget.ScrollView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -39,7 +37,7 @@ class CatBreedFragment : Fragment() {
         fileSizeTextView = view.findViewById(R.id.file_size_text_view)
 
         catViewModel.init((activity?.application as CatApplication).catComponent)
-        catViewModel.breedList.observe(this, Observer {breeds ->
+        catViewModel.cacheText.observe(this, Observer { breeds ->
             breedsTextView.text = breeds.fold("", {acc, breedModel -> "$acc $breedModel"})
             if (breeds.isNotEmpty()) {
                 breedsProgressBar.visibility = View.GONE
@@ -62,7 +60,7 @@ class CatBreedFragment : Fragment() {
             catViewModel.deleteBreeds()
         }
 
-        catViewModel.breedFileSize.observe(this, Observer { fileSize ->
+        catViewModel.cacheTextFileSize.observe(this, Observer { fileSize ->
             fileSizeTextView.text = fileSize
         })
 

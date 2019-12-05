@@ -19,20 +19,20 @@ class CatViewModel @Inject constructor(
     val catDownloadManager: CatDownloadManager
 ): ViewModel() {
 
-    private val breedsFileName = "breeds"
+    private val textFileName = "breeds"
     private val imageFileName = "catPic"
 
     fun init(component: CatComponent) {
-        breedFileSize.postValue("File Size: Unknown")
-        imageFileSize.postValue("File Size: Unknown")
+        cacheTextFileSize.postValue("File Size: Unknown")
+        cacheImageFileSize.postValue("File Size: Unknown")
     }
 
     val catList: MutableLiveData<List<CatModel>> = MutableLiveData()
     val errorMessage: MutableLiveData<Unit> = MutableLiveData()
-    val breedList: MutableLiveData<List<BreedModel>> = MutableLiveData()
-    val breedFileSize: MutableLiveData<String> = MutableLiveData()
-    val singleCatImage: MutableLiveData<Bitmap?> = MutableLiveData()
-    val imageFileSize: MutableLiveData<String> = MutableLiveData()
+    val cacheText: MutableLiveData<List<BreedModel>> = MutableLiveData()
+    val cacheTextFileSize: MutableLiveData<String> = MutableLiveData()
+    val cacheImage: MutableLiveData<Bitmap?> = MutableLiveData()
+    val cacheImageFileSize: MutableLiveData<String> = MutableLiveData()
 
     fun fetchCats() {
         catList.value = emptyList()
@@ -54,16 +54,16 @@ class CatViewModel @Inject constructor(
     }
 
     fun deleteBreeds() {
-        val deleted = catDownloadManager.deleteFile(breedsFileName)
+        val deleted = catDownloadManager.deleteFile(textFileName)
         if (deleted) {
-            breedList.postValue(emptyList())
+            cacheText.postValue(emptyList())
             updateBreedFileSize()
         }
     }
 
     fun fetchSingleImage() {
         if (catDownloadManager.fileIsDownloaded(imageFileName)) {
-            singleCatImage.postValue(catDownloadManager.fetchImageFromDisk(imageFileName))
+            cacheImage.postValue(catDownloadManager.fetchImageFromDisk(imageFileName))
             updateImageFileSize()
         } else {
             catDownloadManager.downloadImage(
@@ -71,12 +71,12 @@ class CatViewModel @Inject constructor(
                 imageFileName,
                 object : DiskCallBack<Bitmap> {
                     override fun onLoad(result: Bitmap) {
-                        singleCatImage.postValue(result)
+                        cacheImage.postValue(result)
                         updateImageFileSize()
                     }
 
                     override fun onError() {
-                        singleCatImage.postValue(null)
+                        cacheImage.postValue(null)
                     }
 
                 })
@@ -85,23 +85,23 @@ class CatViewModel @Inject constructor(
 
     fun deleteImage() {
         catDownloadManager.deleteFile(imageFileName)
-        singleCatImage.postValue(null)
+        cacheImage.postValue(null)
         updateImageFileSize()
     }
 
     fun fetchBreeds() {
 
-        breedList.value = emptyList()
+        cacheText.value = emptyList()
 
         // check the download manager to see if we have downloaded this file already
-        if (catDownloadManager.fileIsDownloaded(breedsFileName)) {
-            breedList.postValue(catDownloadManager.fetchDownloadedBreed(breedsFileName))
+        if (catDownloadManager.fileIsDownloaded(textFileName)) {
+            cacheText.postValue(catDownloadManager.fetchDownloadedBreed(textFileName))
             updateBreedFileSize()
         } else {
             // Otherwise download and post it
-            catDownloadManager.downloadBreed(breedsFileName, object : DiskCallBack<List<BreedModel>> {
+            catDownloadManager.downloadBreed(textFileName, object : DiskCallBack<List<BreedModel>> {
                 override fun onLoad(result: List<BreedModel>) {
-                    breedList.postValue(result)
+                    cacheText.postValue(result)
                     updateBreedFileSize()
                 }
 
@@ -113,10 +113,10 @@ class CatViewModel @Inject constructor(
     }
 
     fun updateImageFileSize() {
-        imageFileSize.postValue("File Size: ${catDownloadManager.getFileSize(imageFileName)}")
+        cacheImageFileSize.postValue("File Size: ${catDownloadManager.getFileSize(imageFileName)}")
     }
 
     fun updateBreedFileSize() {
-        breedFileSize.postValue("File Size: ${catDownloadManager.getFileSize(breedsFileName)}")
+        cacheTextFileSize.postValue("File Size: ${catDownloadManager.getFileSize(textFileName)}")
     }
 }

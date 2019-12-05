@@ -50,14 +50,14 @@ class CatCacheFragment: Fragment() {
             viewModel.deleteImage()
         }
 
-        viewModel.singleCatImage.observe(this, Observer {
+        viewModel.cacheImage.observe(this, Observer {
             progressBar.visibility = View.GONE
             Glide.with(catImage)
                 .load(it)
                 .into(catImage)
         })
 
-        viewModel.imageFileSize.observe(this, Observer {
+        viewModel.cacheImageFileSize.observe(this, Observer {
             fileSizeTextView.text = it
         })
 
