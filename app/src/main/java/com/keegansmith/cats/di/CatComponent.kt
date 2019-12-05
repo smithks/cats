@@ -9,6 +9,8 @@ import javax.inject.Singleton
 @Component(modules = [CatModule::class])
 interface CatComponent {
 
+    fun catViewModel(): CatViewModel
+
     fun inject(catViewModel: CatViewModel)
 
 }

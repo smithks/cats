@@ -7,9 +7,10 @@
 
     <Button
         android:id="@+id/cat_list_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="160dp"
         android:text="@string/view_cats_string"
+        android:layout_margin="20dp"
         app:layout_constraintBottom_toTopOf="@+id/breed_list_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -18,20 +19,24 @@
 
     <Button
         android:id="@+id/breed_list_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="160dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
         android:text="@string/view_breeds_string"
         app:layout_constraintBottom_toTopOf="@id/view_cat_cache_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cat_list_button" />
+        app:layout_constraintTop_toBottomOf="@id/cat_list_button" />
 
     <Button
         android:id="@+id/view_cat_cache_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="160dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
         android:text="@string/view_cat_cache_string"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/breed_list_button"/>

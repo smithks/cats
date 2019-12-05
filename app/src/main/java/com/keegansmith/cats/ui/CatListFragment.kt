@@ -7,6 +7,8 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -31,7 +33,12 @@ class CatListFragment: Fragment() {
         val errorMessage: TextView = view.findViewById(R.id.error_message_text_view)
 
         // Establish viewmodel and catService
-        val catViewModel = ViewModelProviders.of(activity!!).get(CatViewModel::class.java)
+//        val catViewModel = ViewModelProviders.of(activity!!).get(CatViewModel::class.java)
+
+        val factory = object: ViewModelProvider.Factory {
+            override fun <T : ViewModel?> create(modelClass: Class<T>): T = (activity!!.application as CatApplication).catComponent.catViewModel() as T
+        }
+        val catViewModel = ViewModelProviders.of(this, factory).get(CatViewModel::class.java)
         catViewModel.init((activity?.application as CatApplication).catComponent)
 
         catViewModel.errorMessage.observe(this, Observer {

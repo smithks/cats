@@ -14,20 +14,17 @@ import retrofit2.Callback
 import retrofit2.Response
 import javax.inject.Inject
 
-class CatViewModel : ViewModel() {
-
-    @Inject
-    lateinit var catService: CatService
-
-    @Inject
-    lateinit var catDownloadManager: CatDownloadManager
+class CatViewModel @Inject constructor(
+    val catService: CatService,
+    val catDownloadManager: CatDownloadManager
+): ViewModel() {
 
     private val breedsFileName = "breeds"
     private val imageFileName = "catPic"
 
     fun init(component: CatComponent) {
-        component.inject(this)
         breedFileSize.postValue("File Size: Unknown")
+        imageFileSize.postValue("File Size: Unknown")
     }
 
     val catList: MutableLiveData<List<CatModel>> = MutableLiveData()
@@ -93,6 +90,7 @@ class CatViewModel : ViewModel() {
     }
 
     fun fetchBreeds() {
+
         breedList.value = emptyList()
 
         // check the download manager to see if we have downloaded this file already

@@ -22,7 +22,7 @@ class CatModule(var application: CatApplication) {
         return Retrofit.Builder()
             .baseUrl("https://api.thecatapi.com/")
             .addConverterFactory(MoshiConverterFactory.create())
-            .client(okHttpClient)
+//            .client(okHttpClient)
             .build()
             .create(CatService::class.java)
     }

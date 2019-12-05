@@ -11,6 +11,8 @@ import android.widget.ScrollView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import com.keegansmith.cats.CatApplication
 import com.keegansmith.cats.R
@@ -26,7 +28,10 @@ class CatBreedFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.cat_breed_fragment, container, false)
-        val catViewModel = ViewModelProviders.of(activity!!).get(CatViewModel::class.java)
+        val factory = object: ViewModelProvider.Factory {
+            override fun <T : ViewModel?> create(modelClass: Class<T>): T = (activity!!.application as CatApplication).catComponent.catViewModel() as T
+        }
+        val catViewModel = ViewModelProviders.of(this, factory).get(CatViewModel::class.java)
 
         breedsTextView = view.findViewById(R.id.breeds_text_view)
         breedsProgressBar = view.findViewById(R.id.breeds_loading_progress)
