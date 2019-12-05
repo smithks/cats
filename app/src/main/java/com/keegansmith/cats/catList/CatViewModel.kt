@@ -8,12 +8,9 @@ import com.keegansmith.cats.api.CatService
 import com.keegansmith.cats.api.model.BreedModel
 import com.keegansmith.cats.api.model.CatModel
 import com.keegansmith.cats.di.CatComponent
+import com.keegansmith.cats.persistance.CacheLoadError
 import com.keegansmith.cats.persistance.CatDownloadManager
-import com.keegansmith.cats.persistance.DiskCallBack
 import kotlinx.coroutines.launch
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import javax.inject.Inject
 
 class CatViewModel @Inject constructor(
@@ -49,24 +46,20 @@ class CatViewModel @Inject constructor(
     }
 
     fun fetchSingleImage() {
-        if (catDownloadManager.fileIsDownloaded(imageFileName)) {
-            cacheImage.postValue(catDownloadManager.fetchImageFromDisk(imageFileName))
-            updateImageFileSize()
-        } else {
-            catDownloadManager.downloadImage(
-                "https://cdn2.thecatapi.com/images/251.jpg",
-                imageFileName,
-                object : DiskCallBack<Bitmap> {
-                    override fun onLoad(result: Bitmap) {
-                        cacheImage.postValue(result)
-                        updateImageFileSize()
-                    }
-
-                    override fun onError() {
-                        cacheImage.postValue(null)
-                    }
-
-                })
+        viewModelScope.launch {
+            try {
+                if (catDownloadManager.fileIsDownloaded(imageFileName)) {
+                    cacheImage.value = catDownloadManager.fetchImageFromDisk(imageFileName)
+                } else {
+                    cacheImage.value = catDownloadManager.downloadImage(
+                        "https://cdn2.thecatapi.com/images/251.jpg",
+                        imageFileName
+                    )
+                }
+                updateImageFileSize()
+            } catch (ex: CacheLoadError) {
+                cacheImage.value = null
+            }
         }
     }
 
@@ -76,30 +69,25 @@ class CatViewModel @Inject constructor(
         updateImageFileSize()
     }
 
-    fun updateImageFileSize() {
-        cacheImageFileSize.postValue("File Size: ${catDownloadManager.getFileSize(imageFileName)}")
+    private fun updateImageFileSize() {
+        viewModelScope.launch {
+            cacheImageFileSize.postValue("File Size: ${catDownloadManager.getFileSize(imageFileName)}")
+        }
     }
 
     fun fetchText() {
-
-        cacheText.value = emptyList()
-
-        // check the download manager to see if we have downloaded this file already
-        if (catDownloadManager.fileIsDownloaded(textFileName)) {
-            cacheText.postValue(catDownloadManager.fetchDownloadedBreed(textFileName))
-            updateTextFileSize()
-        } else {
-            // Otherwise download and post it
-            catDownloadManager.downloadBreed(textFileName, object : DiskCallBack<List<BreedModel>> {
-                override fun onLoad(result: List<BreedModel>) {
-                    cacheText.postValue(result)
-                    updateTextFileSize()
+        viewModelScope.launch {
+            try {
+                // check the download manager to see if we have downloaded this file already
+                if (catDownloadManager.fileIsDownloaded(textFileName)) {
+                    cacheText.value = catDownloadManager.fetchDownloadedBreed(textFileName)
+                } else {
+                    cacheText.value = catDownloadManager.downloadBreed(textFileName)
                 }
-
-                override fun onError() {
-                    errorMessage.postValue(Unit)
-                }
-            })
+                updateTextFileSize()
+            } catch (ex: CacheLoadError) {
+                cacheText.value = emptyList()
+            }
         }
     }
 
@@ -111,7 +99,9 @@ class CatViewModel @Inject constructor(
         }
     }
 
-    fun updateTextFileSize() {
-        cacheTextFileSize.postValue("File Size: ${catDownloadManager.getFileSize(textFileName)}")
+    private fun updateTextFileSize() {
+        viewModelScope.launch {
+            cacheTextFileSize.postValue("File Size: ${catDownloadManager.getFileSize(textFileName)}")
+        }
     }
 }

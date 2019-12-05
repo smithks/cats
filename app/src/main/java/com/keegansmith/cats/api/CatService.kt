@@ -17,8 +17,8 @@ interface CatService {
     fun fetchBreeds(): Call<List<BreedModel>>
 
     @GET("v1/breeds?limit=10")
-    fun downloadBreeds(): Call<ResponseBody>
+    suspend fun downloadBreeds(): ResponseBody
 
     @GET
-    fun downloadImage(@Url url: String): Call<ResponseBody>
+    suspend fun downloadImage(@Url url: String): ResponseBody
 }
