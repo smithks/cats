@@ -49,15 +49,15 @@ class CatBreedFragment : Fragment() {
         })
 
         breedsProgressBar.visibility = View.VISIBLE
-        catViewModel.fetchBreeds()
+        catViewModel.fetchText()
 
         view.findViewById<Button>(R.id.fetch_breeds_button).setOnClickListener {
-            catViewModel.fetchBreeds()
+            catViewModel.fetchText()
             breedsProgressBar.visibility = View.VISIBLE
         }
 
         view.findViewById<Button>(R.id.delete_breeds_button).setOnClickListener {
-            catViewModel.deleteBreeds()
+            catViewModel.deleteText()
         }
 
         catViewModel.cacheTextFileSize.observe(this, Observer { fileSize ->

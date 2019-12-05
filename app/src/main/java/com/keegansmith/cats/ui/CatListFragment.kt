@@ -55,10 +55,10 @@ class CatListFragment: Fragment() {
         })
 
         // Fetch initial list
-        catViewModel.fetchCats()
+        catViewModel.fetchCatList()
 
         // Set FAB click listener
-        view.findViewById<FloatingActionButton>(R.id.cat_refresh).setOnClickListener { view -> catViewModel.fetchCats() }
+        view.findViewById<FloatingActionButton>(R.id.cat_refresh).setOnClickListener { view -> catViewModel.fetchCatList() }
         return view
     }
 

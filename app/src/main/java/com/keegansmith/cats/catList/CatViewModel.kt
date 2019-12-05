@@ -34,7 +34,7 @@ class CatViewModel @Inject constructor(
     val cacheImage: MutableLiveData<Bitmap?> = MutableLiveData()
     val cacheImageFileSize: MutableLiveData<String> = MutableLiveData()
 
-    fun fetchCats() {
+    fun fetchCatList() {
         catList.value = emptyList()
         catService.fetchRandomCats().enqueue(object : Callback<List<CatModel>> {
             override fun onFailure(call: Call<List<CatModel>>, t: Throwable) {
@@ -51,14 +51,6 @@ class CatViewModel @Inject constructor(
             }
 
         })
-    }
-
-    fun deleteBreeds() {
-        val deleted = catDownloadManager.deleteFile(textFileName)
-        if (deleted) {
-            cacheText.postValue(emptyList())
-            updateBreedFileSize()
-        }
     }
 
     fun fetchSingleImage() {
@@ -89,20 +81,24 @@ class CatViewModel @Inject constructor(
         updateImageFileSize()
     }
 
-    fun fetchBreeds() {
+    fun updateImageFileSize() {
+        cacheImageFileSize.postValue("File Size: ${catDownloadManager.getFileSize(imageFileName)}")
+    }
+
+    fun fetchText() {
 
         cacheText.value = emptyList()
 
         // check the download manager to see if we have downloaded this file already
         if (catDownloadManager.fileIsDownloaded(textFileName)) {
             cacheText.postValue(catDownloadManager.fetchDownloadedBreed(textFileName))
-            updateBreedFileSize()
+            updateTextFileSize()
         } else {
             // Otherwise download and post it
             catDownloadManager.downloadBreed(textFileName, object : DiskCallBack<List<BreedModel>> {
                 override fun onLoad(result: List<BreedModel>) {
                     cacheText.postValue(result)
-                    updateBreedFileSize()
+                    updateTextFileSize()
                 }
 
                 override fun onError() {
@@ -112,11 +108,15 @@ class CatViewModel @Inject constructor(
         }
     }
 
-    fun updateImageFileSize() {
-        cacheImageFileSize.postValue("File Size: ${catDownloadManager.getFileSize(imageFileName)}")
+    fun deleteText() {
+        val deleted = catDownloadManager.deleteFile(textFileName)
+        if (deleted) {
+            cacheText.postValue(emptyList())
+            updateTextFileSize()
+        }
     }
 
-    fun updateBreedFileSize() {
+    fun updateTextFileSize() {
         cacheTextFileSize.postValue("File Size: ${catDownloadManager.getFileSize(textFileName)}")
     }
 }
