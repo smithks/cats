@@ -11,7 +11,7 @@ import retrofit2.http.Url
 interface CatService {
 
     @GET("v1/images/search?limit=10&mime_types=jpg,png")
-    fun fetchRandomCats(): Call<List<CatModel>>
+    suspend fun fetchRandomCats(): List<CatModel>
 
     @GET("v1/breeds?limit=10")
     fun fetchBreeds(): Call<List<BreedModel>>
