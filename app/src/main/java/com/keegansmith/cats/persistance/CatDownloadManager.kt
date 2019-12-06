@@ -22,7 +22,7 @@ class CatDownloadManager @Inject constructor(val catService: CatService,
             file.canRead()
         }
 
-    suspend fun getFileSize(fileName: String): String = withContext(Dispatchers.IO) {
+    suspend fun getFileSize(fileName: String): String = withContext(Dispatchers.IO){
         val file = File(filesDir, fileName)
         if (file.exists() && file.isFile) {
             formatFileSize(file.length())
@@ -40,9 +40,9 @@ class CatDownloadManager @Inject constructor(val catService: CatService,
         }
     }
 
-    fun deleteFile(fileName: String): Boolean {
+    suspend fun deleteFile(fileName: String): Boolean = withContext(Dispatchers.IO) {
         val file = File(filesDir, fileName)
-        return try {
+        try {
             file.delete()
             true
         } catch (exception: Exception) {
@@ -55,7 +55,7 @@ class CatDownloadManager @Inject constructor(val catService: CatService,
             val file = File(filesDir, id)
             BitmapFactory.decodeFile(file.absolutePath)
         } catch (e: Exception) {
-            throw CacheLoadError("Error fetching from disk")
+            throw CacheException("Error reading from disk")
         }
     }
 
@@ -64,7 +64,7 @@ class CatDownloadManager @Inject constructor(val catService: CatService,
         val responseBody = try {
             inputStream.readBytes().toString(Charsets.UTF_8)
         } catch (exception: IOException) {
-            throw CacheLoadError("Error reading from cache")
+            throw CacheException("Error reading from disk")
         } finally {
             inputStream.close()
         }
@@ -88,7 +88,7 @@ class CatDownloadManager @Inject constructor(val catService: CatService,
             writeToDisk(fileName, responseBody)
             return fetchImageFromDisk(fileName)
         } catch (ex: Throwable) {
-            throw CacheLoadError("Error fetching from network")
+            throw CacheException("Error fetching from network")
         }
     }
 
@@ -98,7 +98,7 @@ class CatDownloadManager @Inject constructor(val catService: CatService,
             writeToDisk(fileName, responseBody)
             return fetchDownloadedBreed(fileName)
         } catch (ex: Throwable) {
-            throw CacheLoadError("Error fetching from network")
+            throw CacheException("Error fetching from network")
         }
     }
 
@@ -106,9 +106,9 @@ class CatDownloadManager @Inject constructor(val catService: CatService,
         try {
             File(filesDir, id).writeBytes(responseBody.bytes())
         } catch (exception: IOException) {
-            throw CacheLoadError("Error saving to disk")
+            throw CacheException("Error saving to disk")
         }
     }
 }
 
-class CacheLoadError(message: String): Exception(message)
+class CacheException(message: String): Exception(message)

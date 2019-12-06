@@ -8,7 +8,7 @@ import com.keegansmith.cats.api.CatService
 import com.keegansmith.cats.api.model.BreedModel
 import com.keegansmith.cats.api.model.CatModel
 import com.keegansmith.cats.di.CatComponent
-import com.keegansmith.cats.persistance.CacheLoadError
+import com.keegansmith.cats.persistance.CacheException
 import com.keegansmith.cats.persistance.CatDownloadManager
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -16,7 +16,7 @@ import javax.inject.Inject
 class CatViewModel @Inject constructor(
     val catService: CatService,
     val catDownloadManager: CatDownloadManager
-): ViewModel() {
+) : ViewModel() {
 
     private val textFileName = "breeds"
     private val imageFileName = "catPic"
@@ -57,16 +57,20 @@ class CatViewModel @Inject constructor(
                     )
                 }
                 updateImageFileSize()
-            } catch (ex: CacheLoadError) {
+            } catch (ex: CacheException) {
                 cacheImage.value = null
             }
         }
     }
 
     fun deleteImage() {
-        catDownloadManager.deleteFile(imageFileName)
-        cacheImage.postValue(null)
-        updateImageFileSize()
+        viewModelScope.launch {
+            val deleted = catDownloadManager.deleteFile(imageFileName)
+            if (deleted) {
+                cacheImage.postValue(null)
+                updateImageFileSize()
+            }
+        }
     }
 
     private fun updateImageFileSize() {
@@ -85,17 +89,19 @@ class CatViewModel @Inject constructor(
                     cacheText.value = catDownloadManager.downloadBreed(textFileName)
                 }
                 updateTextFileSize()
-            } catch (ex: CacheLoadError) {
+            } catch (ex: CacheException) {
                 cacheText.value = emptyList()
             }
         }
     }
 
     fun deleteText() {
-        val deleted = catDownloadManager.deleteFile(textFileName)
-        if (deleted) {
-            cacheText.postValue(emptyList())
-            updateTextFileSize()
+        viewModelScope.launch {
+            val deleted = catDownloadManager.deleteFile(textFileName)
+            if (deleted) {
+                cacheText.postValue(emptyList())
+                updateTextFileSize()
+            }
         }
     }
 
