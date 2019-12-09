@@ -6,27 +6,25 @@ import com.keegansmith.cats.api.CatService
 import com.keegansmith.cats.api.model.BreedModel
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import okhttp3.ResponseBody
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import java.io.File
 import java.io.IOException
-import java.lang.Exception
 import javax.inject.Inject
 
 class CatDownloadManager @Inject constructor(val catService: CatService,
                                              val filesDir: File,
                                              val moshi: Moshi) {
 
-    fun fileIsDownloaded(fileName: String): Boolean {
-        val file = File(filesDir, fileName)
-        return file.canRead()
-    }
+    suspend fun fileIsDownloaded(fileName: String): Boolean = withContext(Dispatchers.IO) {
+            val file = File(filesDir, fileName)
+            file.canRead()
+        }
 
-    fun getFileSize(fileName: String): String {
+    suspend fun getFileSize(fileName: String): String = withContext(Dispatchers.IO){
         val file = File(filesDir, fileName)
-        return if (file.exists() && file.isFile) {
+        if (file.exists() && file.isFile) {
             formatFileSize(file.length())
         } else {
             "${0}"
@@ -42,9 +40,9 @@ class CatDownloadManager @Inject constructor(val catService: CatService,
         }
     }
 
-    fun deleteFile(fileName: String): Boolean {
+    suspend fun deleteFile(fileName: String): Boolean = withContext(Dispatchers.IO) {
         val file = File(filesDir, fileName)
-        return try {
+        try {
             file.delete()
             true
         } catch (exception: Exception) {
@@ -52,93 +50,65 @@ class CatDownloadManager @Inject constructor(val catService: CatService,
         }
     }
 
-    fun fetchImageFromDisk(id: String): Bitmap? {
-        val file = File(filesDir, id)
-        return try {
+    suspend fun fetchImageFromDisk(id: String): Bitmap = withContext(Dispatchers.IO) {
+        try {
+            val file = File(filesDir, id)
             BitmapFactory.decodeFile(file.absolutePath)
         } catch (e: Exception) {
-            null
+            throw CacheException("Error reading from disk")
         }
     }
 
-    fun fetchDownloadedBreed(id: String): List<BreedModel> {
+    suspend fun fetchDownloadedBreed(id: String): List<BreedModel> = withContext(Dispatchers.IO) {
         val inputStream = File(filesDir, id).inputStream()
         val responseBody = try {
             inputStream.readBytes().toString(Charsets.UTF_8)
         } catch (exception: IOException) {
-            ""
+            throw CacheException("Error reading from disk")
         } finally {
             inputStream.close()
         }
 
-        return if (responseBody.isNotBlank()) {
-            val adapter = moshi.adapter<List<BreedModel>>(Types.newParameterizedType(List::class.java, BreedModel::class.java))
+        if (responseBody.isNotBlank()) {
+            val adapter = moshi.adapter<List<BreedModel>>(
+                Types.newParameterizedType(
+                    List::class.java,
+                    BreedModel::class.java
+                )
+            )
             adapter.fromJson(responseBody) ?: emptyList()
         } else {
             emptyList()
         }
     }
 
-    fun downloadImage(url:String, fileName: String, diskCallBack: DiskCallBack<Bitmap>) {
-        catService.downloadImage(url).enqueue(object : Callback<ResponseBody> {
-            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-                diskCallBack.onError()
-            }
-
-            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
-                val body = response.body()
-                if (body != null) {
-                    if (writeToDisk(fileName, body)) {
-                        val bitmap = fetchImageFromDisk(fileName)
-                        if (bitmap != null) {
-                            diskCallBack.onLoad(bitmap)
-                        } else {
-                            diskCallBack.onError()
-                        }
-                    } else {
-                        diskCallBack.onError()
-                    }
-                }
-            }
-        })
+    suspend fun downloadImage(url:String, fileName: String): Bitmap {
+        try {
+            val responseBody = catService.downloadImage(url)
+            writeToDisk(fileName, responseBody)
+            return fetchImageFromDisk(fileName)
+        } catch (ex: Throwable) {
+            throw CacheException("Error fetching from network")
+        }
     }
 
-    fun downloadBreed(fileName: String, diskCallBack: DiskCallBack<List<BreedModel>>) {
-        catService.downloadBreeds().enqueue(object : Callback<ResponseBody> {
-            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-                diskCallBack.onError()
-            }
-
-            override fun onResponse(
-                call: Call<ResponseBody>,
-                response: Response<ResponseBody>
-            ) {
-                // Store response body to disk, convert it and return it
-                val body = response.body()
-                if (body != null) {
-                    if (writeToDisk(fileName, body)) {
-                        diskCallBack.onLoad(fetchDownloadedBreed(fileName))
-                    } else {
-                        diskCallBack.onError()
-                    }
-                } else {
-                    diskCallBack.onError()
-                }
-            }
-
-        })
+    suspend fun downloadBreed(fileName: String): List<BreedModel> {
+        try {
+            val responseBody = catService.downloadBreeds()
+            writeToDisk(fileName, responseBody)
+            return fetchDownloadedBreed(fileName)
+        } catch (ex: Throwable) {
+            throw CacheException("Error fetching from network")
+        }
     }
 
-    fun writeToDisk(id: String, responseBody: ResponseBody): Boolean =
+    private suspend fun writeToDisk(id: String, responseBody: ResponseBody) = withContext(Dispatchers.IO) {
         try {
             File(filesDir, id).writeBytes(responseBody.bytes())
-            true
         } catch (exception: IOException) {
-            false
+            throw CacheException("Error saving to disk")
         }
+    }
 }
 
-interface DiskCallBack<T> {
-    fun onLoad(result: T)
-    fun onError()
-}
+class CacheException(message: String): Exception(message)

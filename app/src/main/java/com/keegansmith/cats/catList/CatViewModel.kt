@@ -3,21 +3,20 @@ package com.keegansmith.cats.catList
 import android.graphics.Bitmap
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.keegansmith.cats.api.CatService
 import com.keegansmith.cats.api.model.BreedModel
 import com.keegansmith.cats.api.model.CatModel
 import com.keegansmith.cats.di.CatComponent
+import com.keegansmith.cats.persistance.CacheException
 import com.keegansmith.cats.persistance.CatDownloadManager
-import com.keegansmith.cats.persistance.DiskCallBack
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class CatViewModel @Inject constructor(
     val catService: CatService,
     val catDownloadManager: CatDownloadManager
-): ViewModel() {
+) : ViewModel() {
 
     private val textFileName = "breeds"
     private val imageFileName = "catPic"
@@ -35,88 +34,80 @@ class CatViewModel @Inject constructor(
     val cacheImageFileSize: MutableLiveData<String> = MutableLiveData()
 
     fun fetchCatList() {
-        catList.value = emptyList()
-        catService.fetchRandomCats().enqueue(object : Callback<List<CatModel>> {
-            override fun onFailure(call: Call<List<CatModel>>, t: Throwable) {
+        viewModelScope.launch {
+            try {
+                catList.value = emptyList()
+                val cats = catService.fetchRandomCats()
+                catList.value = cats
+            } catch (ex: Throwable) {
                 errorMessage.postValue(Unit)
             }
-
-            override fun onResponse(
-                call: Call<List<CatModel>>,
-                response: Response<List<CatModel>>
-            ) {
-                response.body()?.let {
-                    catList.value = it
-                }
-            }
-
-        })
+        }
     }
 
     fun fetchSingleImage() {
-        if (catDownloadManager.fileIsDownloaded(imageFileName)) {
-            cacheImage.postValue(catDownloadManager.fetchImageFromDisk(imageFileName))
-            updateImageFileSize()
-        } else {
-            catDownloadManager.downloadImage(
-                "https://cdn2.thecatapi.com/images/251.jpg",
-                imageFileName,
-                object : DiskCallBack<Bitmap> {
-                    override fun onLoad(result: Bitmap) {
-                        cacheImage.postValue(result)
-                        updateImageFileSize()
-                    }
-
-                    override fun onError() {
-                        cacheImage.postValue(null)
-                    }
-
-                })
+        viewModelScope.launch {
+            try {
+                if (catDownloadManager.fileIsDownloaded(imageFileName)) {
+                    cacheImage.value = catDownloadManager.fetchImageFromDisk(imageFileName)
+                } else {
+                    cacheImage.value = catDownloadManager.downloadImage(
+                        "https://cdn2.thecatapi.com/images/251.jpg",
+                        imageFileName
+                    )
+                }
+                updateImageFileSize()
+            } catch (ex: CacheException) {
+                cacheImage.value = null
+            }
         }
     }
 
     fun deleteImage() {
-        catDownloadManager.deleteFile(imageFileName)
-        cacheImage.postValue(null)
-        updateImageFileSize()
+        viewModelScope.launch {
+            val deleted = catDownloadManager.deleteFile(imageFileName)
+            if (deleted) {
+                cacheImage.postValue(null)
+                updateImageFileSize()
+            }
+        }
     }
 
-    fun updateImageFileSize() {
-        cacheImageFileSize.postValue("File Size: ${catDownloadManager.getFileSize(imageFileName)}")
+    private fun updateImageFileSize() {
+        viewModelScope.launch {
+            cacheImageFileSize.postValue("File Size: ${catDownloadManager.getFileSize(imageFileName)}")
+        }
     }
 
     fun fetchText() {
-
-        cacheText.value = emptyList()
-
-        // check the download manager to see if we have downloaded this file already
-        if (catDownloadManager.fileIsDownloaded(textFileName)) {
-            cacheText.postValue(catDownloadManager.fetchDownloadedBreed(textFileName))
-            updateTextFileSize()
-        } else {
-            // Otherwise download and post it
-            catDownloadManager.downloadBreed(textFileName, object : DiskCallBack<List<BreedModel>> {
-                override fun onLoad(result: List<BreedModel>) {
-                    cacheText.postValue(result)
-                    updateTextFileSize()
+        viewModelScope.launch {
+            try {
+                // check the download manager to see if we have downloaded this file already
+                if (catDownloadManager.fileIsDownloaded(textFileName)) {
+                    cacheText.value = catDownloadManager.fetchDownloadedBreed(textFileName)
+                } else {
+                    cacheText.value = catDownloadManager.downloadBreed(textFileName)
                 }
-
-                override fun onError() {
-                    errorMessage.postValue(Unit)
-                }
-            })
+                updateTextFileSize()
+            } catch (ex: CacheException) {
+                cacheText.value = emptyList()
+            }
         }
     }
 
     fun deleteText() {
-        val deleted = catDownloadManager.deleteFile(textFileName)
-        if (deleted) {
-            cacheText.postValue(emptyList())
-            updateTextFileSize()
+        viewModelScope.launch {
+            val deleted = catDownloadManager.deleteFile(textFileName)
+            if (deleted) {
+                cacheText.postValue(emptyList())
+                updateTextFileSize()
+            }
         }
     }
 
-    fun updateTextFileSize() {
-        cacheTextFileSize.postValue("File Size: ${catDownloadManager.getFileSize(textFileName)}")
+    private fun updateTextFileSize() {
+        viewModelScope.launch {
+            cacheTextFileSize.postValue("File Size: ${catDownloadManager.getFileSize(textFileName)}")
+        }
     }
 }
