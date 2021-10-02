@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cat_nav_graph"
+    app:startDestination="@id/catMainFragment">
+    <fragment
+        android:id="@+id/catMainFragment"
+        android:name="com.keegansmith.cats.ui.CatMainFragment"
+        tools:layout="@layout/cat_main_fragment">
+        <action
+            android:id="@+id/action_catMainFragment_to_catCacheFragment"
+            app:destination="@id/catCacheFragment" />
+        <action
+            android:id="@+id/action_catMainFragment_to_catListFragment"
+            app:destination="@id/catListFragment" />
+        <action
+            android:id="@+id/action_catMainFragment_to_catBreedFragment"
+            app:destination="@id/catBreedFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/catCacheFragment"
+        android:name="com.keegansmith.cats.ui.CatCacheFragment"
+        tools:layout="@layout/cat_cache_fragment"/>
+    <fragment
+        android:id="@+id/catBreedFragment"
+        android:name="com.keegansmith.cats.ui.CatBreedFragment"
+        tools:layout="@layout/cat_breed_fragment"/>
+    <fragment
+        android:id="@+id/catListFragment"
+        android:name="com.keegansmith.cats.ui.CatListFragment"
+        tools:layout="@layout/cat_list_fragment"/>
+</navigation>
